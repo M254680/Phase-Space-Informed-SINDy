@@ -21,57 +21,29 @@ eq = 1;
 
 % Time settings
 dt = 0.001;  % Time step
-t_final = 25;  % Total time
+t_final = 15;  % Total time
 t_span = 0.001:dt:t_final;  % Time vector
 
 % Initial conditions
+if eq==1
     %Two Attractor
         x01=[-2;-2];  
-        % x02=[-1/2;-5];
-        %   x03=[1/2;2];
-          % x03=[3;-4];
 
-          %Test case the breaks 
-% x01=[3;-4];
-
-
-       x05=[5;1/25];
-       % x05=[2;2];
-        
+       x05=[2;10];
+elseif eq==2
      %Duffing
 
-     
-%IC 1 and 2 on different lobs
-     % x01=[-1;7/4];  
-        % x02=[-3/2;-5];
-          % x03=[0;-11/3];
-          % x04=[3;-4];
-%2IC with 1 lobe
-     % x01=[3;-4];
-     %  x02=[-3/2;-5];
+     x01=[3;-4];
 
-%Tight on left
-% x01=[-2.3;-0];
-
-%Tight on Right
- % x01=[0.81;.75];
-
-       % x05=[-5;2/5];  
+      x05=[0.75;.75];
+else
      %Lorenz
-        % x01=[-2;-2;0];  %right lobe
-
-        %  x01=[2;-5;7];
-        % x02=[1/2;2;-2];  %left lobe
-        % x03=[-1/2;-5;3];
-        % x04=[3;-4;1];
+        % x01=[-8;5;9];  %right lobe
+        % 
         % 
         % x05=[2;5;15];
 
-x01=[3,3];
-x02=[-2,-1/2];
-x03=[4.8,-1.001];
-
-x05=[-4,1/2];
+end
 
 % Integrate the True System
 n=2; %number of state variables
@@ -92,7 +64,7 @@ ylim([-5/2,5/2])
 
 rng(7401) % Seed for reproducibility
 %Noise method "+- <= percentage of noise.
-        noise_level = 0.005;  % 0.5% noise
+        noise_level = 0.05;  % 1% noise
 
         % % Generate random noise in the range [-noise_level*100%, +noise_level*100 %] of each element in xT1
         % %take value between 0 &1, subtracts .5 and multiples by 2 to get +-
@@ -123,7 +95,7 @@ n=n; %preset already for ODE45
 
 
  %Defing True Coefficents
-%  XiT=SystemXiT( lambda_D, gamma, sigma, beta, rho,eq);
+ XiT=SystemXiT( lambda_D, gamma, sigma, beta, rho,eq);
 % poolDataLIST({'x','y'},XiT,n,polyorder,usesine);
 % poolDataLIST({'x','y','z'},XiT,n,polyorder,usesine);
 
@@ -176,56 +148,60 @@ Xi_SG = sparsifyDynamics(Theta_SG,dxT1N_SG,lambda,n,iters);
 Xi_DD = sparsifyDynamics(Theta_DD,dxT1N_DD,lambda,n,iters);
 % Display the identified models
 poolDataLIST({'x','y'},Xi_SG,n,polyorder,usesine);
-% poolDataLIST({'x','y','z'},XiC,n,polyorder,usesine);
+% poolDataLIST({'x','y','z'},Xi_SG,n,polyorder,usesine);
 
 poolDataLIST({'x','y'},Xi_DD,n,polyorder,usesine);
-% poolDataLIST({'x','y','z'},Xi1,n,polyorder,usesine);
+% poolDataLIST({'x','y','z'},Xi_DD,n,polyorder,usesine);
 
-% %% Results
-% 
-% [tC,xi_SG_1]=ode45(@(t,x)sparseGalerkin(t,x,Xi_SG,polyorder,usesine),t_span,x01,options); 
-%  [t1,xi_DD_1]=ode45(@(t,x)sparseGalerkin(t,x,Xi_DD,polyorder,usesine),t_span,x01,options); 
-% 
-% 
-% 
-% figure
-% hold on
-% title('Two-Attractor X-Time Series of True and SINDys on IC1 (Training Validation)')
-% plot(tT1,xT1(:,1),'k','LineWidth',1.75)
-% plot(tC,xi_SG_1(:,1),'r--','LineWidth',1.5)
-% plot(t1,xi_DD_1(:,1),'b--','LineWidth',1.25)
-% 
-% legend('True','SG','DD')
-% ylabel('x')
-% xlabel('t')
-% 
-% RRMSE_XiC1_1=RRMSE(xT1, xi_SG_1);
-% RRMSE_XiC2_1=RRMSE(xT1, xi_DD_1);
-% RRMSEall_1=[RRMSE_XiC1_1, RRMSE_XiC2_1]
-% 
-% 
-% [tT5,xT5]=ode45(@(t,x)System(t,x, lambda_D, gamma, sigma, beta, rho,eq),t_span,x05,options);
-% [tC,xi_SG_5]=ode45(@(t,x)sparseGalerkin(t,x,Xi_SG,polyorder,usesine),t_span,x05,options); 
-% [t1,xi_DD_5]=ode45(@(t,x)sparseGalerkin(t,x,Xi_DD,polyorder,usesine),t_span,x05,options); 
-% 
-%  figure
-% hold on
-% title('Two-Attractor X-Time Series of True and SINDys on IC5 (Testing Validation)')
-% plot(tT5,xT5(:,1),'k','LineWidth',1.75)
-% plot(tC,xi_SG_5(:,1),'r--','LineWidth',1.5)
-% plot(t1,xi_DD_5(:,1),'b--','LineWidth',1.25)
-% 
-% legend('True','SG','DD')
-% ylabel('x')
-% xlabel('t')
-% 
-% RRMSE_XiC1_5=RRMSE(xT5, xi_SG_5)
-% RRMSE_XiC2_5=RRMSE(xT5, xi_DD_5);
-% RRMSEall_5=[RRMSE_XiC1_5, RRMSE_XiC2_5]
+%% Results
+
+[tC,xi_SG_1]=ode45(@(t,x)sparseGalerkin(t,x,Xi_SG,polyorder,usesine),t_span,x01,options); 
+ [t1,xi_DD_1]=ode45(@(t,x)sparseGalerkin(t,x,Xi_DD,polyorder,usesine),t_span,x01,options); 
+
+
+
+figure
+hold on
+title('Duffing X-Time Series of True and SINDys on IC1 (Training Validation)')
+plot(tT1,xT1(:,1),'k','LineWidth',1.75)
+plot(tC,xi_SG_1(:,1),'r--','LineWidth',1.5)
+plot(t1,xi_DD_1(:,1),'b--','LineWidth',1.25)
+
+legend('True','SG','DD')
+ylabel('x')
+xlabel('t')
+
+RRMSE_XiC1_1=RRMSE(xT1, xi_SG_1);
+RRMSE_XiC2_1=RRMSE(xT1, xi_DD_1);
+RRMSEall_1=[RRMSE_XiC1_1(1,1), RRMSE_XiC2_1(1,1)]
+
+%%
+[tT5,xT5]=ode45(@(t,x)System(t,x, lambda_D, gamma, sigma, beta, rho,eq),t_span,x05,options);
+[tC,xi_SG_5]=ode45(@(t,x)sparseGalerkin(t,x,Xi_SG,polyorder,usesine),t_span,x05,options); 
+[t1,xi_DD_5]=ode45(@(t,x)sparseGalerkin(t,x,Xi_DD,polyorder,usesine),t_span,x05,options); 
+%%
+ figure
+hold on
+title('Duffing X-Time Series of True and SINDys on IC5 (Testing Validation)')
+plot(tT5,xT5(:,1),'k','LineWidth',1.75)
+plot(tC,xi_SG_5(:,1),'r--','LineWidth',1.5)
+plot(t1,xi_DD_5(:,1),'b--','LineWidth',1.25)
+
+legend('True','SG','DD')
+ylabel('x')
+xlabel('t')
+
+RRMSE_XiC1_5=RRMSE(xT5, xi_SG_5);
+RRMSE_XiC2_5=RRMSE(xT5, xi_DD_5);
+RRMSEall_5=[RRMSE_XiC1_5(1,1), RRMSE_XiC2_5(1,1)]
+ 
+%Relative Sparisty of SG and DD
+RelSparsity_SG=Sparsity(XiT,Xi_SG)
+RelSparsity_DD=Sparsity(XiT,Xi_DD)
 
 %%
 function Error=RRMSE(xT, xP)
-Error=rmse(xT,xP)/vecnorm(xT);
+Error=rmse(xT,xP)./std(xT);
 end
 
 function SparsityValue=Sparsity(XiT,XiP)

@@ -4,9 +4,13 @@ set(0, 'DefaultAxesFontSize', 14);
 set(0, 'DefaultTextFontSize', 14);
 
 % Select the system: 1 = Two-Attractor, 2 = Duffing, 3 = Lorenz
-eq=3;
+eq=1;
 
-
+if eq==3
+    n=3; %number of observables
+else
+    n=2; %number of observables
+end
 
 %% Define System Parameters
     % Lorenz's parameters (chaotic)
@@ -21,92 +25,85 @@ eq=3;
 
 %% Time Configuration
 dt = 0.001;  % Time step
-t_final = 25;  % Total time
+t_final = 10;  % Total time
 t_span = 0.001:dt:t_final;  % Time vector
-t_span_L = 0.001:dt:t_final*4;  % Time vector
+t_span_L = 0.001:dt:t_final*2;  % Time vector
 
 %% Define Initial Conditions
-    %Two Attractor
-        % x01=[-2;-2];  
-        % x02=[-1/2;-5];
-        %   x03=[1/2;2];
-        %   x04=[3;-4];
+            %Two Attractor
+            if eq==1
+ x01=    [-2;-2];            %L
+ x02=     [-0.5,-5] ;          %L
+ x03=    [3;-4]   ;   %R
 
-          %Test case the breaks 
-% x01=[3;-4];
+ x05=    [5;1/25]   ;   %R
+             %Duffing
+            elseif eq==2
+ x01=    [-2.5;0];            %L
+ x02=     [-1.5,-5] ;          %L
+ x03=    [2.4;2]   ;   %R
 
+ x05=    [-2;2.5]   ;   %R
 
-       % x05=[5;1/25];
+             %Lorenz
+             else
+ x01=    [5;15;20];            %I
+  x02=     [-1.5;-5;5] ;          %I
+  x03=    [50;60;80]   ;   %O
 
-
-       % x05=[2;2]; Ignore
-         
-     %Duffing
-
-     
-%IC 1 and 2 on different lobs
-     % x01=[-1;7/4];  
-       
-%2IC with 1 lobe
-     % x01=[3;-4];
-     %  x02=[-3/2;-5];
-
-     %Tight on Right
- % x01=[0.81;.75];
-
-%Tight on left
-%TEST CASE
-% x01=[-2.3;0];
-%  x02=[-3/2;-5];
-%           x03=[0;-11/3];
-%           x04=[3;-4];
-% 
-% 
-%         x05=[-5;2/5];  
+  x05=    [40;30;20]   ;   %O
+  end
 
 
-%Test case for section 4
-% x03=[-2.3;0];
-%  x02=[-3/2;-5];
-%           x01=[0;-11/3];
-%           x04=[3;-4];
-% 
-% 
-%         x05=[-5;2/5];  
-
-
-
-
-     %Lorenz
-        % x01=[-2;-2;0];  %right lobe
-
-         x01=[2;-5;7];
-        x02=[1/2;2;-2];  %left lobe
-        x03=[-1/2;-5;3];
-        x04=[3;-4;1];
-
-        x05=[2;5;15];
-
-n=3;
 % Integrate the system
-n=3; %number of observables
 options = odeset('RelTol',1e-12,'AbsTol',1e-12*ones(1,n));
-[tT1_L,xT1_L]=ode45(@(t,x)System(t,x, lambda_D, gamma, sigma, beta, rho,eq),t_span_L,x01,options);
+[tT1_L,xT1_Long]=ode45(@(t,x)System(t,x, lambda_D, gamma, sigma, beta, rho,eq),t_span_L,x01,options);
 [tT1,xT1]=ode45(@(t,x)System(t,x, lambda_D, gamma, sigma, beta, rho,eq),t_span,x01,options);
 [tT2,xT2]=ode45(@(t,x)System(t,x, lambda_D, gamma, sigma, beta, rho,eq),t_span,x02,options);
- [tT,xT3]=ode45(@(t,x)System(t,x, lambda_D, gamma, sigma, beta, rho,eq),t_span,x03,options); 
- [tT,xT4]=ode45(@(t,x)System(t,x, lambda_D, gamma, sigma, beta, rho,eq),t_span,x04,options); 
+ [tT3,xT3]=ode45(@(t,x)System(t,x, lambda_D, gamma, sigma, beta, rho,eq),t_span,x03,options);
 
-%% Plot Phase Portrait
+[tT5,xT5]=ode45(@(t,x)System(t,x, lambda_D, gamma, sigma, beta, rho,eq),t_span,x05,options);
+
+% Plot Phase Portrait
 figure
 hold on
-plot(xT1(:,1),xT1(:,2))
-plot(xT2(:,1),xT2(:,2))
-plot(xT3(:,1),xT3(:,2))
-plot(xT4(:,1),xT4(:,2))
+if eq==3
+plot3(xT1(:,1),xT1(:,2),xT1(:,3),'LineWidth',1.75)
+plot3(xT2(:,1),xT2(:,2),xT2(:,3),'LineWidth',1.75)
+plot3(xT3(:,1),xT3(:,2),xT3(:,3),'LineWidth',1.75)
+plot3(xT5(:,1),xT5(:,2),xT5(:,3),'LineWidth',1.75)
+ xlabel('x')
+        ylabel('y')
+        zlabel('z')
+view(-131,8)
+else
+plot(xT1(:,1),xT1(:,2),'LineWidth',1.75)
+plot(xT2(:,1),xT2(:,2),'LineWidth',1.75)
+plot(xT3(:,1),xT3(:,2),'LineWidth',1.75)
+plot(xT5(:,1),xT5(:,2),'LineWidth',1.75)
+xline(0, 'Color', 'k', 'LineWidth', 1); % Draw line for Y axis.
+yline(0, 'Color', 'k', 'LineWidth', 1); % Draw line for X axis.
+    xlabel('x')
+        ylabel('y')
+end
 
-legend('IC1','IC2','IC3','IC4')
 
+if eq==1
+xlim([-2,2]) %For Two Attractor
+ylim([-2,2])%For Two Attractor
+    xlabel('x')
+        ylabel('y')
+end
+if eq==2;
+xlim([-4,4]) %For Duffing
+ylim([-4,4])%For Duffing
+    xlabel('x')
+        ylabel('y')
+end
+
+grid on
+% title('Trajectories of IC1, IC2, IC3, and IC5')
+% legend('IC1','IC2', 'IC3', 'IC5')
 %% Lyapunov Exponent
 % dim = 3;
 % [~,lag] = phaseSpaceReconstruction(xT2(:,1),[],dim);
@@ -126,17 +123,15 @@ rng(7401) %seed for replication
         noise1 = (rand(size(xT1)) - 0.5) * 2 * noise_level .* xT1;
         noise2 = (rand(size(xT2)) - 0.5) * 2 * noise_level .* xT2;
         noise3 = (rand(size(xT3)) - 0.5) * 2 * noise_level .* xT3;
-        noise4 = (rand(size(xT4)) - 0.5) * 2 * noise_level .* xT4;
         
-         noise1_L = (rand(size(xT1_L)) - 0.5) * 2 * noise_level .* xT1_L;
+         noise1_L = (rand(size(xT1_Long)) - 0.5) * 2 * noise_level .* xT1_Long;
 
         % Add the noise to the original matrix
         xT1N = xT1 + noise1;
         xT2N=xT2+noise2;
         xT3N=xT3+noise3;
-        xT4N=xT4+noise4;
 
-        xT1N_L = xT1_L + noise1_L;
+        xT1N_Long = xT1_Long + noise1_L;
     
         %plot noise and normal
            figure
@@ -151,7 +146,11 @@ rng(7401) %seed for replication
         legend('Contaminated','Uncontaminated')
 %% generate Library SINDy Parameters
 %libary parameters
+if eq==3
 polyorder = 2;
+else
+polyorder = 3;
+end
 usesine = 0;
 
 %dimension set
@@ -160,9 +159,11 @@ n=n; %preset already for ODE45
 
 %% Define True Coefficients for Lorenz System
  XiT=SystemXiT( lambda_D, gamma, sigma, beta, rho,eq);
-% poolDataLIST({'x','y'},XiT,n,polyorder,usesine);
+ if n==2
+poolDataLIST({'x','y'},XiT,n,polyorder,usesine);
+ else
 poolDataLIST({'x','y','z'},XiT,n,polyorder,usesine);
-
+ end
 
 %% Savitzky-Golay Derivative Estimation
 % Set Savitzky-Golay filter parameters
@@ -183,128 +184,176 @@ for i=1:n
 end
 dxT1N=dxT1N((windowSize+1)/2:end-((windowSize-1)/2),:);
 
-dxT2N=zeros(size(xT1N));
+dxT2N=zeros(size(xT2N));
 for i=1:n
     dxT2N(:,i)=conv(xT2N(:,i), factorial(1)*g(:,2)/(-dt)^1, 'same');
 end
 dxT2N=dxT2N((windowSize+1)/2:end-((windowSize-1)/2),:);
 
-dxT3N=zeros(size(xT1N));
+dxT3N=zeros(size(xT3N));
 for i=1:n
     dxT3N(:,i)=conv(xT3N(:,i), factorial(1)*g(:,2)/(-dt)^1, 'same');
 end
 dxT3N=dxT3N((windowSize+1)/2:end-((windowSize-1)/2),:);
 
-dxT4N=zeros(size(xT1N));
-for i=1:n
-    dxT4N(:,i)=conv(xT4N(:,i), factorial(1)*g(:,2)/(-dt)^1, 'same');
-end
-dxT4N=dxT4N((windowSize+1)/2:end-((windowSize-1)/2),:);
 
-dxT1N_L=zeros(size(xT1N_L));
+dxT1N_Long=zeros(size(xT1N_Long));
 for i=1:n
-    dxT1N_L(:,i)=conv(xT1N_L(:,i), factorial(1)*g(:,2)/(-dt)^1, 'same');
+    dxT1N_Long(:,i)=conv(xT1N_Long(:,i), factorial(1)*g(:,2)/(-dt)^1, 'same');
 end
-dxT1N_L=dxT1N_L((windowSize+1)/2:end-((windowSize-1)/2),:);
+dxT1N_Long=dxT1N_Long((windowSize+1)/2:end-((windowSize-1)/2),:);
 
 %% Combining SG 
  % Trim unfiltered fringe
  xT1N=xT1N((windowSize+1)/2:end-((windowSize-1)/2),:);
  xT2N=xT2N((windowSize+1)/2:end-((windowSize-1)/2),:);
  xT3N=xT3N((windowSize+1)/2:end-((windowSize-1)/2),:);
- xT4N=xT4N((windowSize+1)/2:end-((windowSize-1)/2),:);
 
- xT1N_L=xT1N_L((windowSize+1)/2:end-((windowSize-1)/2),:);
+ xT1N_Long=xT1N_Long((windowSize+1)/2:end-((windowSize-1)/2),:);
 %% Combine State and Derivative Data for Library Construction
- % xTC=[xT1N; xT2N];
-   xTC=[xT1N; xT2N; xT3N;xT4N];
+ xTC_LL=[xT1N; xT2N];
+dxTC_LL=[dxT1N; dxT2N];
 
-% dxTC=[dxT1N; dxT2N];
-dxTC=[dxT1N; dxT2N;dxT3N;dxT4N];
-
+ xTC_LR=[xT1N; xT3N];
+dxTC_LR=[dxT1N; dxT3N];
 
 %% Build Library of Candidate Functions
-Theta_C= poolData(xTC,n,polyorder,usesine);
-Theta_L= poolData(xT1N_L,n,polyorder,usesine);
+Theta_LL= poolData(xTC_LL,n,polyorder,usesine);
+Theta_LR= poolData(xTC_LR,n,polyorder,usesine);
+Theta_Long= poolData(xT1N_Long,n,polyorder,usesine);
 
 
 %% Sparse Regression to Identify Dynamics
 lambda = .25;      % sparsity coefficent
 iters=25;
-XiC = sparsifyDynamics(Theta_C,dxTC,lambda,n,iters);
- % poolDataLIST({'x','y'},XiC,n,polyorder,usesine);
-poolDataLIST({'x','y','z'},XiC,n,polyorder,usesine);
-Xi1_L = sparsifyDynamics(Theta_L,dxT1N_L,lambda,n,iters);
- % poolDataLIST({'x','y'},Xi1_L,n,polyorder,usesine);
-poolDataLIST({'x','y','z'},Xi1_L,n,polyorder,usesine);
+Xi_LL = sparsifyDynamics(Theta_LL,dxTC_LL,lambda,n,iters);
+ if n==2
+ poolDataLIST({'x','y'},Xi_LL,n,polyorder,usesine);
+ else poolDataLIST({'x','y','z'},Xi_LL,n,polyorder,usesine); end
 
+ Xi_LR = sparsifyDynamics(Theta_LR,dxTC_LR,lambda,n,iters);
+ if n==2
+ poolDataLIST({'x','y'},Xi_LR,n,polyorder,usesine);
+ else poolDataLIST({'x','y','z'},Xi_LR,n,polyorder,usesine); end
+
+Xi1_Long = sparsifyDynamics(Theta_Long,dxT1N_Long,lambda,n,iters);
+ if n==2
+ poolDataLIST({'x','y'},Xi1_Long,n,polyorder,usesine);
+ else poolDataLIST({'x','y','z'},Xi1_Long,n,polyorder,usesine); end
 %% Evaluate and Plot Results on Training IC
-[tC,xC_1]=ode45(@(t,x)sparseGalerkin(t,x,XiC,polyorder,usesine),t_span,x01,options); 
- [t1,x1_1]=ode45(@(t,x)sparseGalerkin(t,x,Xi1_L,polyorder,usesine),t_span,x01,options); 
+[tC_LL,xC_LL]=ode45(@(t,x)sparseGalerkin(t,x,Xi_LL,polyorder,usesine),t_span,x01,options); 
+[tC_LR,xC_LR]=ode45(@(t,x)sparseGalerkin(t,x,Xi_LR,polyorder,usesine),t_span,x01,options); 
+ [t1,x1_Long]=ode45(@(t,x)sparseGalerkin(t,x,Xi1_Long,polyorder,usesine),t_span,x01,options); 
 
-Sparsity_XiC_0=Sparsity(XiT,XiC)
-Sparsity_XiC_L=Sparsity(XiT,Xi1_L)
-Sparsity_all=[Sparsity_XiC_0, Sparsity_XiC_L]
+Sparsity_XiC_LL=Sparsity(XiT,Xi_LL)
+Sparsity_XiC_LR=Sparsity(XiT,Xi_LR)
+Sparsity_XiC_Long=Sparsity(XiT,Xi1_Long)
+% Sparsity_all=[Sparsity_XiC_LL,Sparsity_XiC_LR, Sparsity_XiC_Long]
 
 figure
 hold on
+plot(tT1,xT1(:,1),'k','LineWidth',1.95)
+plot(tC_LL,xC_LL(:,1),'r--','LineWidth',1.75)
+plot(tC_LR,xC_LR(:,1),'g--','LineWidth',1.5)
+plot(t1,x1_Long(:,1),'b--','LineWidth',1.25)
+if eq==1
+title('Two-Attractor X-Time Series of True and SINDys on IC1 (Training Validation)')
+legend('True','LL', 'LR','One Long')
+end
+if eq==2
+title('Duffing X-Time Series of True and SINDys on IC1 (Training Validation)')
+legend('True','LL', 'LR','One Long')
+end
+if eq==3
 title('Lorenz X-Time Series of True and SINDys on IC1 (Training Validation)')
-plot(tT1,xT1(:,1),'k','LineWidth',1.75)
-plot(tC,xC_1(:,1),'r--','LineWidth',1.5)
-plot(t1,x1_1(:,1),'b--','LineWidth',1.25)
+legend('True','II', 'IO','I')
+end
 
-legend('True','Combined','One Long')
+
+
 ylabel('x')
 xlabel('t')
 
-RRMSE_XiC0_1=RRMSE(xT1, xC_1);
-RRMSE_XiCL_1=RRMSE(xT1, x1_1);
-RRMSEall_1=[RRMSE_XiC0_1, RRMSE_XiCL_1]
+RRMSE_Xi_LL_1=RRMSE(xT1, xC_LL)
+RRMSE_Xi_LR_1=RRMSE(xT1, xC_LR)
+RRMSE_Xi_Long_1=RRMSE(xT1, x1_Long)
+% RRMSEall_1=[RRMSE_Xi_LL_1(1,1), RRMSE_Xi_LR_1(1,1), RRMSE_Xi_Long_1(1,1)]
 
 %% Evaluate and Plot Results on Testing IC
-[tT5,xT5]=ode45(@(t,x)System(t,x, lambda_D, gamma, sigma, beta, rho,eq),t_span,x05,options);
-[tC,xC_5]=ode45(@(t,x)sparseGalerkin(t,x,XiC,polyorder,usesine),t_span,x05,options); 
-[t1,x1_5]=ode45(@(t,x)sparseGalerkin(t,x,Xi1_L,polyorder,usesine),t_span,x05,options); 
+[tC_LL,xC_LL]=ode45(@(t,x)sparseGalerkin(t,x,Xi_LL,polyorder,usesine),t_span,x05,options); 
+[tC_LL,xC_LR]=ode45(@(t,x)sparseGalerkin(t,x,Xi_LR,polyorder,usesine),t_span,x05,options); 
+[t1,x1_5]=ode45(@(t,x)sparseGalerkin(t,x,Xi1_Long,polyorder,usesine),t_span,x05,options); 
 
  figure
 hold on
-title('Lorenz X-Time Series of True and SINDys on IC5 (Testing Validation)')
-plot(tT5,xT5(:,1),'k','LineWidth',1.75)
-plot(tC,xC_5(:,1),'r--','LineWidth',1.5)
+plot(tT5,xT5(:,1),'k','LineWidth',1.95)
+plot(tC_LL,xC_LL(:,1),'r--','LineWidth',1.75)
+plot(tC_LR,xC_LR(:,1),'g--','LineWidth',1.5)
 plot(t1,x1_5(:,1),'b--','LineWidth',1.25)
+if eq==1
+title('Two-Attractor X-Time Series of True and SINDys on IC5 (Testing Validation)')
+legend('True','LL', 'LR','One Long')
+end
+if eq==2
+title('Duffing X-Time Series of True and SINDys on IC5 (Testing Validation)')
+legend('True','LL', 'LR','One Long')
+end
+if eq==3
+title('Lorenz X-Time Series of True and SINDys on IC5 (Testing Validation)')
+legend('True','II', 'IO','I')
+end
 
-legend('True','Combined','One Long')
+
 ylabel('x')
 xlabel('t')
 
-RRMSE_XiC0_5=RRMSE(xT5, xC_5)
-RRMSE_XiCL_5=RRMSE(xT5, x1_5);
-RRMSEall_5=[RRMSE_XiC0_5, RRMSE_XiCL_5]
+RRMSE_Xi_LL_5=RRMSE(xT5, xC_LL)
+RRMSE_Xi_LR_5=RRMSE(xT5, xC_LR)
+RRMSE_Xi_Long_5=RRMSE(xT5, x1_5)
+% RRMSEall_5=[RRMSE_Xi_LL_5(1,1),RRMSE_Xi_LR_5(1,1), RRMSE_Xi_Long_5(1,1)]
 
-%% Calculating Arc Lengths
+%% Segment Lengths
+if n==2
+Seglen1=sqrt(diff(xT1(:,1),1).^2+diff(xT1(:,2),1).^2);
+arclen1= sum(Seglen1);
 
-%n=2
-% [arclen1,Seglen1] = arclength(xT1(:,1),xT1(:,2));
-% [arclen2,Seglen2] = arclength(xT2(:,1),xT2(:,2));
-% [arclen3,Seglen3] = arclength(xT3(:,1),xT3(:,2));
-% [arclen4,Seglen4] = arclength(xT4(:,1),xT4(:,2));
-% [arclenL,SeglenL] = arclength(xT1_L(:,1),xT1_L(:,2));
-% ArclenC=arclen1+arclen2+arclen3+arclen4
-% arclenL
+    Seglen2=sqrt(diff(xT2(:,1),1).^2+diff(xT2(:,2),1).^2);
+arclen2= sum(Seglen2);
+
+    Seglen3=sqrt(diff(xT3(:,1),1).^2+diff(xT3(:,2),1).^2);
+arclen3= sum(Seglen3);
 
 
-%n=3
-[arclen1,Seglen1] = arclength(xT1,n);
-[arclen2,Seglen2] = arclength(xT2.n);
-[arclen3,Seglen3] = arclength(xT3.n);
-[arclen4,Seglen4] = arclength(xT4.n);
-[arclenL,SeglenL] = arclength(xT1_L,n);
-ArclenC=arclen1+arclen2+arclen3+arclen4
+ SeglenL=sqrt(diff(xT1_Long(:,1),1).^2+diff(xT1_Long(:,2),1).^2);
+arclenL= sum(SeglenL);
+else
+Seglen1=sqrt(diff(xT1(:,1),1).^2+diff(xT1(:,2),1).^2+diff(xT1(:,3),1).^2);
+arclen1= sum(Seglen1);
+
+    Seglen2=sqrt(diff(xT2(:,1),1).^2+diff(xT2(:,2),1).^2+diff(xT2(:,3),1).^2);
+arclen2= sum(Seglen2);
+
+    Seglen3=sqrt(diff(xT3(:,1),1).^2+diff(xT3(:,2),1).^2+diff(xT3(:,3),1).^2);
+arclen3= sum(Seglen3);
+
+
+ SeglenL=sqrt(diff(xT1_Long(:,1),1).^2+diff(xT1_Long(:,2),1).^2+diff(xT1_Long(:,3),1).^2);
+arclenL= sum(SeglenL);
+end
+
+
+SeglenLimL=Seglen2(end)
+SeglenLimR=Seglen3(end)
+SeglenLimLong=SeglenL(end)
+ArclenLL=arclen1+arclen2
+ArclenLR=arclen1+arclen3
 arclenL
+
+
 
 %%
 function Error=RRMSE(xT, xP)
-Error=rmse(xT,xP)/vecnorm(xT);
+Error=rmse(xT,xP)./std(xT);
 end
 
 function SparsityValue=Sparsity(XiT,XiP)
@@ -627,13 +676,13 @@ newout
 end
 
 
-function [arclen,seglen] = arclength(X,n)
-
-if n==2
- seglen=sqrt(diff(xT1_L(:,1),1).^2+diff(xT1_L(:,2),1).^2)
-arclen = sum(seglen);
-else
-end
-seglen=sqrt(diff(xT1_L(:,1),1).^2+diff(xT1_L(:,2),1).^2+diff(xT1_L(:,3),1).^2)
-arclen = sum(seglen);
-end % function arclength
+% function [arclen,seglen] = arclength(X,n)
+% 
+% if n==2
+%  seglen=sqrt(diff(X(:,1),1).^2+diff(X(:,2),1).^2);
+% arclen = sum(seglen);
+% else
+% seglen=sqrt(diff(X(:,1),1).^2+diff(X(:,2),1).^2+diff(X(:,3),1).^2);
+% arclen = sum(seglen);
+% end 
+% end
