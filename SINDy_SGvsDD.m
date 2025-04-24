@@ -1,10 +1,10 @@
 clear all, clc, close all
-set(0, 'DefaultAxesFontSize', 14);   % Set default font size for plots
-set(0, 'DefaultTextFontSize', 14);   % Set default font size for text
+set(0, 'DefaultAxesFontSize', 35);   % Set default font size for plots
+set(0, 'DefaultTextFontSize', 35);   % Set default font size for text
 
 % Select system: 
 % eq = 1 → Two-Attractor, 2 → Duffing oscillator, 3 → Lorenz system
-eq = 1;  
+eq = 2;  
 
 
 
@@ -27,26 +27,28 @@ t_span = 0.001:dt:t_final;  % Time vector
 % Initial conditions
 if eq==1
     %Two Attractor
+    n=2;%number of state variables
         x01=[-2;-2];  
 
        x05=[2;10];
 elseif eq==2
      %Duffing
-
+n=2;%number of state variables
      x01=[3;-4];
 
       x05=[0.75;.75];
 else
      %Lorenz
-        % x01=[-8;5;9];  %right lobe
-        % 
-        % 
-        % x05=[2;5;15];
+     n=3; %number of state variables
+        x01=[-8;5;9];  %right lobe
+
+
+        x05=[2;5;15];
 
 end
 
 % Integrate the True System
-n=2; %number of state variables
+
 options = odeset('RelTol',1e-12,'AbsTol',1e-12*ones(1,n));
 [tT1,xT1]=ode45(@(t,x)System(t,x, lambda_D, gamma, sigma, beta, rho,eq),t_span,x01,options);
 
@@ -87,7 +89,11 @@ rng(7401) % Seed for reproducibility
         legend('Contaminated','Uncontaminated')
 %% Set SINDy Library Parameters
 %libary parameters
-polyorder = 3; % Polynomial order of library (up to cubic terms)
+if eq==3;
+polyorder = 2; % Polynomial order of library (up to cubic terms)
+else
+    polyorder=3;
+end
 usesine = 0; % Do not use sine terms
 
 %dimension set
@@ -147,11 +153,15 @@ Xi_SG = sparsifyDynamics(Theta_SG,dxT1N_SG,lambda,n,iters);
 
 Xi_DD = sparsifyDynamics(Theta_DD,dxT1N_DD,lambda,n,iters);
 % Display the identified models
+if n==2
 poolDataLIST({'x','y'},Xi_SG,n,polyorder,usesine);
-% poolDataLIST({'x','y','z'},Xi_SG,n,polyorder,usesine);
-
 poolDataLIST({'x','y'},Xi_DD,n,polyorder,usesine);
-% poolDataLIST({'x','y','z'},Xi_DD,n,polyorder,usesine);
+else
+poolDataLIST({'x','y','z'},Xi_SG,n,polyorder,usesine);
+poolDataLIST({'x','y','z'},Xi_DD,n,polyorder,usesine);
+end
+
+
 
 %% Results
 
@@ -162,7 +172,13 @@ poolDataLIST({'x','y'},Xi_DD,n,polyorder,usesine);
 
 figure
 hold on
-title('Duffing X-Time Series of True and SINDys on IC1 (Training Validation)')
+if eq==1;
+title('Two-Attractor X-Time Series of True and SINDys on IC1 (Training Validation)')
+elseif eq==2;
+    title('Duffing X-Time Series of True and SINDys on IC1 (Training Validation)')
+else
+title('Lorenz X-Time Series of True and SINDys on IC1 (Training Validation)')
+end
 plot(tT1,xT1(:,1),'k','LineWidth',1.75)
 plot(tC,xi_SG_1(:,1),'r--','LineWidth',1.5)
 plot(t1,xi_DD_1(:,1),'b--','LineWidth',1.25)
@@ -182,7 +198,13 @@ RRMSEall_1=[RRMSE_XiC1_1(1,1), RRMSE_XiC2_1(1,1)]
 %%
  figure
 hold on
-title('Duffing X-Time Series of True and SINDys on IC5 (Testing Validation)')
+if eq==1
+    title('Two-Attractor X-Time Series of True and SINDys on IC5 (Testing Validation)')
+elseif eq==2
+    title('Duffing X-Time Series of True and SINDys on IC5 (Testing Validation)')
+else
+title('Lorenz X-Time Series of True and SINDys on IC5 (Testing Validation)')
+end
 plot(tT5,xT5(:,1),'k','LineWidth',1.75)
 plot(tC,xi_SG_5(:,1),'r--','LineWidth',1.5)
 plot(t1,xi_DD_5(:,1),'b--','LineWidth',1.25)

@@ -1,7 +1,7 @@
 %% Initialization and System Selection
 clear all, clc, close all
-set(0, 'DefaultAxesFontSize', 14);
-set(0, 'DefaultTextFontSize', 14);
+set(0, 'DefaultAxesFontSize', 35);
+set(0, 'DefaultTextFontSize', 35);
 
 % Select the system: 1 = Two-Attractor, 2 = Duffing, 3 = Lorenz
 eq=3;

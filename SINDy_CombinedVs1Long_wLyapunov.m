@@ -1,7 +1,7 @@
 %% Initialization and System Selection
 clear all, clc, close all
-set(0, 'DefaultAxesFontSize', 14); 
-set(0, 'DefaultTextFontSize', 14); 
+set(0, 'DefaultAxesFontSize', 35); 
+set(0, 'DefaultTextFontSize', 35); 
 
 % Select the system: 1 = Two-Attractor, 2 = Duffing, 3 = Lorenz
 eq=1;
@@ -102,8 +102,8 @@ ylim([-4,4])%For Duffing
 end
 
 grid on
-% title('Trajectories of IC1, IC2, IC3, and IC5')
-% legend('IC1','IC2', 'IC3', 'IC5')
+title('Trajectories of IC1, IC2, IC3, and IC5')
+legend('IC1','IC2', 'IC3', 'IC5')
 %% Lyapunov Exponent
 % dim = 3;
 % [~,lag] = phaseSpaceReconstruction(xT2(:,1),[],dim);
